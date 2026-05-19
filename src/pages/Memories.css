@@ -1,0 +1,60 @@
+.memories-page {
+  padding: 48px 0 80px 0;
+}
+
+.memories-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.tabs-container {
+  width: 100%;
+  border-bottom: 1px solid var(--surface-container-high);
+  margin-bottom: 32px;
+}
+
+.tabs-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tabs-scroll::-webkit-scrollbar-track {
+  background: var(--surface-container-low);
+  border-radius: 4px;
+}
+
+.tabs-scroll::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 4px;
+}
+
+.tab-button {
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  padding: 8px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: var(--rounded-full);
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.tab-button.active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
