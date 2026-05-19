@@ -2,19 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import './LightboxGallery.css';
 
+// Dynamically import all images in the src/assets/imgs directory
+const imagesImport = import.meta.glob('../assets/imgs/**/*.{png,jpg,jpeg,webp,gif}', { eager: true });
+
 const LightboxGallery = ({ activeTab }) => {
   const [images, setImages] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // In Vite, we can dynamically load all images from the public directory
-    // Note: Since they are in public, we can just assume a structure or mock them if empty.
-    // For a real deployment, you'd either fetch from an API or use import.meta.glob inside src/assets
-    // Here we will generate placeholders to demonstrate the UI, but allow them to be replaced by real images.
-    
-    // Simulate fetching images based on branch (activeTab)
-    // If it's "All", combine them.
     const branches = [
       'Assiut', 'Ain_shams', 'Alex', 'Sohag', 'Menoufia', 'Tanta',
       'Ismailia', 'Fayoum', 'Beni_Suef', 'Minya', 'Qena', 'Hurghada', 'Sadat'
@@ -22,29 +18,53 @@ const LightboxGallery = ({ activeTab }) => {
     
     let loadedImages = [];
     
-    // Create some placeholder data since public folder images can't be listed via JS easily without an API
-    // In a real scenario, the user will drop images here. We'll simulate 3 images per branch.
-    const targetBranches = activeTab === 'All' ? branches : [activeTab];
-    
-    targetBranches.forEach(branch => {
-      // Pushing simulated image paths (these won't exist until the user adds them, so we add a fallback)
-      for (let i = 1; i <= 3; i++) {
-        loadedImages.push({
-          src: `/imgs/${branch}/student${i}.jpg`,
-          alt: `${branch} Student ${i}`,
-          fallback: `https://via.placeholder.com/600x600/3b82f6/ffffff?text=${branch}+Student+${i}`,
-          branch: branch
-        });
+    // Process imported images
+    for (const path in imagesImport) {
+      const module = imagesImport[path];
+      
+      // Path looks like: ../assets/imgs/Assiut/1779189051173.png
+      // Extract branch name from path
+      let branchName = 'Unknown';
+      
+      // Find which branch this belongs to
+      for (const branch of branches) {
+        if (path.includes(`/${branch}/`)) {
+          branchName = branch;
+          break;
+        }
       }
-    });
 
-    setImages(loadedImages);
+      loadedImages.push({
+        src: module.default,
+        alt: `${branchName} Student`,
+        branch: branchName
+      });
+    }
+
+    // Filter by active tab
+    const targetBranches = activeTab === 'All' ? branches : [activeTab];
+    let filteredImages = loadedImages.filter(img => targetBranches.includes(img.branch));
+
+    // If no real images exist for this tab yet, generate fallback placeholders
+    if (filteredImages.length === 0) {
+      targetBranches.forEach(branch => {
+        for (let i = 1; i <= 3; i++) {
+          filteredImages.push({
+            src: `https://via.placeholder.com/600x600/3b82f6/ffffff?text=${branch}+Student+${i}`,
+            alt: `${branch} Student ${i}`,
+            branch: branch
+          });
+        }
+      });
+    }
+
+    setImages(filteredImages);
   }, [activeTab]);
 
   const openLightbox = (index) => {
     setCurrentIndex(index);
     setLightboxOpen(true);
-    document.body.style.overflow = 'hidden'; // Prevent scrolling when lightbox is open
+    document.body.style.overflow = 'hidden';
   };
 
   const closeLightbox = () => {
@@ -62,11 +82,6 @@ const LightboxGallery = ({ activeTab }) => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  // Handle fallback image error
-  const handleImageError = (e, fallbackSrc) => {
-    e.target.src = fallbackSrc;
-  };
-
   return (
     <div className="gallery-container">
       <div className="gallery-grid">
@@ -80,7 +95,6 @@ const LightboxGallery = ({ activeTab }) => {
               <img 
                 src={img.src} 
                 alt={img.alt} 
-                onError={(e) => handleImageError(e, img.fallback)}
                 loading="lazy"
               />
               <div className="gallery-overlay">
@@ -94,7 +108,7 @@ const LightboxGallery = ({ activeTab }) => {
         ))}
       </div>
 
-      {lightboxOpen && (
+      {lightboxOpen && images.length > 0 && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>
             <X size={32} />
@@ -108,7 +122,6 @@ const LightboxGallery = ({ activeTab }) => {
             <img 
               src={images[currentIndex].src} 
               alt={images[currentIndex].alt}
-              onError={(e) => handleImageError(e, images[currentIndex].fallback)}
               className="lightbox-img"
             />
             <div className="lightbox-caption">
