@@ -18,12 +18,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .countdown-grid {
-    gap: 12px;
-  }
-}
-
 .countdown-box {
   display: flex;
   flex-direction: column;
@@ -36,9 +30,9 @@
   transition: transform 0.3s ease;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .countdown-box {
-    padding: 16px 12px;
+    padding: 20px 16px;
   }
 }
 
@@ -75,13 +69,7 @@
 
 @media (max-width: 768px) {
   .countdown-number {
-    font-size: 40px;
-  }
-}
-
-@media (max-width: 480px) {
-  .countdown-number {
-    font-size: 32px;
+    font-size: 36px;
   }
 }
 
@@ -95,9 +83,8 @@
   opacity: 0.9;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .countdown-label {
-    font-size: 11px;
-    letter-spacing: 0.05em;
+    font-size: 12px;
   }
 }
