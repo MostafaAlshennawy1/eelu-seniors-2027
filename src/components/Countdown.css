@@ -18,7 +18,7 @@
   .countdown-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
-    padding: 0 12px;
+    padding: 0 16px;
   }
 }
 
@@ -27,18 +27,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 32px;
+  padding: 32px;
   border-radius: var(--rounded-lg);
   color: white;
   box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
-  box-sizing: border-box;
 }
 
 @media (max-width: 480px) {
   .countdown-box {
-    /* Keep the large vertical size, but reduce horizontal padding so it fits 2 side-by-side */
-    padding: 24px 12px;
+    padding: 24px 16px;
   }
 }
 
@@ -75,7 +73,13 @@
 
 @media (max-width: 768px) {
   .countdown-number {
-    font-size: 40px;
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .countdown-number {
+    font-size: 36px;
   }
 }
 
@@ -87,4 +91,10 @@
   letter-spacing: 0.1em;
   margin-top: 8px;
   opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .countdown-label {
+    font-size: 12px;
+  }
 }
