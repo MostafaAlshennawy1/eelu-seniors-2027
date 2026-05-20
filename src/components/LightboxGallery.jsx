@@ -22,8 +22,7 @@ const LightboxGallery = ({ activeTab }) => {
     for (const path in imagesImport) {
       const module = imagesImport[path];
       
-      // Path looks like: ../assets/imgs/Assiut/1779189051173.png
-      // Extract branch name from path
+      // Path looks like: ../assets/imgs/Assiut/Mostafa_Alshennawy.jpg
       let branchName = 'Unknown';
       
       // Find which branch this belongs to
@@ -34,10 +33,16 @@ const LightboxGallery = ({ activeTab }) => {
         }
       }
 
+      // Extract student name from filename
+      const filename = path.split('/').pop();
+      const nameWithoutExtension = filename.replace(/\.[^/.]+$/, "");
+      const studentName = nameWithoutExtension.replace(/[_-]/g, " ");
+
       loadedImages.push({
         src: module.default,
-        alt: `${branchName} Student`,
-        branch: branchName
+        alt: `${studentName} - ${branchName} Branch`,
+        branch: branchName,
+        studentName: studentName
       });
     }
 
@@ -51,8 +56,9 @@ const LightboxGallery = ({ activeTab }) => {
         for (let i = 1; i <= 3; i++) {
           filteredImages.push({
             src: `https://via.placeholder.com/600x600/3b82f6/ffffff?text=${branch}+Student+${i}`,
-            alt: `${branch} Student ${i}`,
-            branch: branch
+            alt: `Student ${i} - ${branch} Branch`,
+            branch: branch,
+            studentName: `Student ${i}`
           });
         }
       });
@@ -102,7 +108,8 @@ const LightboxGallery = ({ activeTab }) => {
               </div>
             </div>
             <div className="gallery-caption">
-              <span className="label-caps text-primary">{img.branch.replace('_', ' ')}</span>
+              <span className="student-name">{img.studentName}</span>
+              <span className="branch-subtitle label-caps text-primary">{img.branch.replace('_', ' ')}</span>
             </div>
           </div>
         ))}
@@ -125,7 +132,8 @@ const LightboxGallery = ({ activeTab }) => {
               className="lightbox-img"
             />
             <div className="lightbox-caption">
-              {images[currentIndex].branch.replace('_', ' ')} Branch
+              <span className="lightbox-student-name">{images[currentIndex].studentName}</span>
+              <span className="lightbox-branch-name">{images[currentIndex].branch.replace('_', ' ')} Branch</span>
             </div>
           </div>
 
