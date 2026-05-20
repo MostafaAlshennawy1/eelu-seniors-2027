@@ -57,22 +57,40 @@
 
 @media (max-width: 600px) {
   .nav-content {
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: space-between;
   }
   
+  .brand {
+    gap: 6px;
+  }
+
   .brand-text {
-    font-size: 18px;
+    font-size: 16px;
   }
   
   .nav-links {
-    gap: 8px;
-    width: 100%;
-    justify-content: center;
+    gap: 4px;
+    width: auto;
+    justify-content: flex-end;
   }
   
   .nav-link {
+    font-size: 13px;
+    padding: 6px 8px;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-text {
     font-size: 14px;
-    padding: 6px 10px;
+    max-width: 100px;
+    white-space: normal;
+  }
+  .nav-link {
+    font-size: 12px;
+    padding: 4px;
   }
 }
