@@ -50,6 +50,15 @@ const LightboxGallery = ({ activeTab }) => {
     const targetBranches = activeTab === 'All' ? branches : [activeTab];
     let filteredImages = loadedImages.filter(img => targetBranches.includes(img.branch));
 
+    // Sort to ensure Mostafa Alshennawy is displayed first
+    filteredImages.sort((a, b) => {
+      const isMostafaA = a.studentName.includes('Mostafa');
+      const isMostafaB = b.studentName.includes('Mostafa');
+      if (isMostafaA && !isMostafaB) return -1;
+      if (!isMostafaA && isMostafaB) return 1;
+      return 0;
+    });
+
     // If no real images exist for this tab yet, generate fallback placeholders
     if (filteredImages.length === 0) {
       targetBranches.forEach(branch => {
