@@ -12,21 +12,56 @@
   cursor: pointer;
   border-radius: var(--rounded-lg);
   overflow: hidden;
-  background-color: var(--surface-container-lowest);
-  border: 1px solid var(--outline-variant);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, outline-color 0.3s ease;
 }
 
-.gallery-item:hover {
+.gallery-item.graduation-frame {
+  border: 6px solid #fef3c7; /* Inner matting color */
+  outline: 1px solid #d4af37; /* Thin outer gold rim */
+  outline-offset: -6px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+.gallery-item.graduation-frame:hover {
   transform: translateY(-8px);
-  border-color: var(--primary);
-  box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.15);
+  border-color: #fde68a;
+  outline-color: #b45309;
+  box-shadow: 0 20px 40px -10px rgba(212, 175, 55, 0.25);
+}
+
+.grad-cap-decoration {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: #d4af37;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  border: 2px solid white;
+  transform: rotate(15deg);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.gallery-item.graduation-frame:hover .grad-cap-decoration {
+  transform: rotate(0deg) scale(1.1);
+  background-color: #b45309;
 }
 
 .gallery-img-wrapper {
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
+  margin: 12px 12px 0 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .gallery-img-wrapper img {

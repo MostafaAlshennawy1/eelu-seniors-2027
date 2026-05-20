@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
 import './LightboxGallery.css';
 
 // Dynamically import all images in the src/assets/imgs directory
@@ -103,9 +103,12 @@ const LightboxGallery = ({ activeTab }) => {
         {images.map((img, index) => (
           <div 
             key={index} 
-            className="gallery-item"
+            className="gallery-item graduation-frame"
             onClick={() => openLightbox(index)}
           >
+            <div className="grad-cap-decoration">
+              <GraduationCap size={24} />
+            </div>
             <div className="gallery-img-wrapper">
               <img 
                 src={img.src} 
