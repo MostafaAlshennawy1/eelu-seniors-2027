@@ -1,67 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@700&display=swap');
+
 .gallery-container {
   margin-top: var(--stack-md);
 }
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 40px 24px;
 }
 
-.gallery-item {
-  cursor: pointer;
-  border-radius: var(--rounded-lg);
-  overflow: hidden;
+.scrapbook-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, outline-color 0.3s ease;
+  cursor: pointer;
+  padding: 16px;
+  background-color: transparent;
+  transition: transform 0.3s ease;
 }
 
-.gallery-item.graduation-frame {
-  border: 6px solid #fef3c7; /* Inner matting color */
-  outline: 1px solid #d4af37; /* Thin outer gold rim */
-  outline-offset: -6px;
-  background-color: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 15px rgba(212, 175, 55, 0.1);
+.scrapbook-wrapper:hover {
+  transform: scale(1.02);
 }
 
-.gallery-item.graduation-frame:hover {
-  transform: translateY(-8px);
-  border-color: #fde68a;
-  outline-color: #b45309;
-  box-shadow: 0 20px 40px -10px rgba(212, 175, 55, 0.25);
+.scrapbook-title {
+  font-family: 'Great Vibes', cursive;
+  font-size: 36px;
+  color: var(--on-surface);
+  margin-bottom: 8px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  z-index: 5;
+}
+
+.gallery-item.polaroid-frame {
+  background-color: #fafafa;
+  padding: 12px 12px 24px 12px; /* Thick bottom border */
+  border-radius: 2px;
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.1), 
+    0 10px 20px rgba(0,0,0,0.08),
+    inset 0 0 0 1px rgba(0,0,0,0.05);
+  position: relative;
+  transform: rotate(-2deg); /* Slight tilt for scrapbook feel */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 280px;
+}
+
+.scrapbook-wrapper:nth-child(even) .gallery-item.polaroid-frame {
+  transform: rotate(2deg);
+}
+
+.scrapbook-wrapper:hover .gallery-item.polaroid-frame {
+  box-shadow: 
+    0 8px 16px rgba(0,0,0,0.15), 
+    0 15px 30px rgba(0,0,0,0.1);
 }
 
 .grad-cap-decoration {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background-color: #d4af37;
-  color: white;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: -24px;
+  left: -20px;
   z-index: 10;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  border: 2px solid white;
-  transform: rotate(15deg);
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transform: rotate(-15deg);
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+  transition: transform 0.3s ease;
 }
 
-.gallery-item.graduation-frame:hover .grad-cap-decoration {
-  transform: rotate(0deg) scale(1.1);
-  background-color: #b45309;
+.scrapbook-wrapper:hover .grad-cap-decoration {
+  transform: rotate(-25deg) scale(1.1);
+}
+
+.year-decoration {
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #4a4a4a;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.8);
+  line-height: 0.9;
+  z-index: 5;
 }
 
 .gallery-img-wrapper {
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  margin: 12px 12px 0 12px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  background-color: #e0e0e0; /* Placeholder color before img loads */
 }
 
 .gallery-img-wrapper img {
@@ -105,23 +139,40 @@
 }
 
 .gallery-caption {
-  padding: 16px;
+  padding: 12px 4px 4px 4px;
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
-.student-name {
-  font-family: var(--font-headline);
+.student-status {
+  font-family: 'Playfair Display', serif;
   font-weight: 700;
-  font-size: 18px;
-  color: var(--on-surface);
+  font-size: 20px;
+  color: #222;
+  letter-spacing: 0.05em;
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
 }
 
 .branch-subtitle {
+  font-family: var(--font-body);
   font-size: 12px;
+  font-weight: 600;
   opacity: 0.8;
+  color: var(--primary);
+  text-transform: uppercase;
+}
+
+.scrapbook-quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--on-surface);
+  opacity: 0.8;
+  margin-top: 16px;
+  text-align: center;
+  z-index: 5;
 }
 
 /* Lightbox Styles */

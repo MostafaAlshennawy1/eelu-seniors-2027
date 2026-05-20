@@ -103,26 +103,36 @@ const LightboxGallery = ({ activeTab }) => {
         {images.map((img, index) => (
           <div 
             key={index} 
-            className="gallery-item graduation-frame"
+            className="scrapbook-wrapper"
             onClick={() => openLightbox(index)}
           >
-            <div className="grad-cap-decoration">
-              <GraduationCap size={24} />
-            </div>
-            <div className="gallery-img-wrapper">
-              <img 
-                src={img.src} 
-                alt={img.alt} 
-                loading="lazy"
-              />
-              <div className="gallery-overlay">
-                <span className="gallery-overlay-text">View Image</span>
+            <div className="scrapbook-title">{img.studentName}</div>
+            <div className="gallery-item polaroid-frame">
+              <div className="grad-cap-decoration">
+                <GraduationCap size={40} strokeWidth={1.5} color="#111" fill="#111" />
+              </div>
+              <div className="year-decoration">
+                <span>2</span>
+                <span>0</span>
+                <span>2</span>
+                <span>7</span>
+              </div>
+              <div className="gallery-img-wrapper">
+                <img 
+                  src={img.src} 
+                  alt={img.alt} 
+                  loading="lazy"
+                />
+                <div className="gallery-overlay">
+                  <span className="gallery-overlay-text">View Image</span>
+                </div>
+              </div>
+              <div className="gallery-caption">
+                <span className="student-status">SENIOR</span>
+                <span className="branch-subtitle label-caps text-primary">{img.branch.replace('_', ' ')}</span>
               </div>
             </div>
-            <div className="gallery-caption">
-              <span className="student-name">{img.studentName}</span>
-              <span className="branch-subtitle label-caps text-primary">{img.branch.replace('_', ' ')}</span>
-            </div>
+            <div className="scrapbook-quote">Time flies, but memories last forever ✨</div>
           </div>
         ))}
       </div>
