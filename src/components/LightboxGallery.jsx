@@ -15,16 +15,16 @@ const LightboxGallery = ({ activeTab }) => {
       'Assiut', 'Ain_shams', 'Alex', 'Sohag', 'Menoufia', 'Tanta',
       'Ismailia', 'Fayoum', 'Beni_Suef', 'Minya', 'Qena', 'Hurghada', 'Sadat'
     ];
-    
+
     let loadedImages = [];
-    
+
     // Process imported images
     for (const path in imagesImport) {
       const module = imagesImport[path];
-      
+
       // Path looks like: ../assets/imgs/Assiut/Mostafa_Alshennawy.jpg
       let branchName = 'Unknown';
-      
+
       // Find which branch this belongs to
       for (const branch of branches) {
         if (path.includes(`/${branch}/`)) {
@@ -101,8 +101,8 @@ const LightboxGallery = ({ activeTab }) => {
     <div className="gallery-container">
       <div className="gallery-grid">
         {images.map((img, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="scrapbook-wrapper"
             onClick={() => openLightbox(index)}
           >
@@ -118,9 +118,9 @@ const LightboxGallery = ({ activeTab }) => {
                 <span>7</span>
               </div>
               <div className="gallery-img-wrapper">
-                <img 
-                  src={img.src} 
-                  alt={img.alt} 
+                <img
+                  src={img.src}
+                  alt={img.alt}
                   loading="lazy"
                 />
                 <div className="gallery-overlay">
@@ -142,14 +142,14 @@ const LightboxGallery = ({ activeTab }) => {
           <button className="lightbox-close" onClick={closeLightbox}>
             <X size={32} />
           </button>
-          
+
           <button className="lightbox-nav lightbox-prev" onClick={prevImage}>
             <ChevronLeft size={48} />
           </button>
 
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-            <img 
-              src={images[currentIndex].src} 
+            <img
+              src={images[currentIndex].src}
               alt={images[currentIndex].alt}
               className="lightbox-img"
             />
