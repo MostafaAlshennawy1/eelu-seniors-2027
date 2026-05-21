@@ -1,0 +1,91 @@
+.terminal-container {
+  background: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  font-family: 'Courier New', Courier, monospace;
+  overflow: hidden;
+  margin: 2rem 0;
+  border: 1px solid #333;
+  width: 100%;
+}
+
+.terminal-header {
+  background: #2d2d2d;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #111;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.terminal-dots .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot.close { background: #ff5f56; }
+.dot.minimize { background: #ffbd2e; }
+.dot.maximize { background: #27c93f; }
+
+.terminal-title {
+  flex-grow: 1;
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.terminal-body {
+  padding: 15px;
+  height: 250px;
+  overflow-y: auto;
+  color: #fff;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.terminal-body::-webkit-scrollbar {
+  width: 8px;
+}
+.terminal-body::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+.terminal-line {
+  word-wrap: break-word;
+}
+
+.terminal-line.system { color: #888; }
+.terminal-line.success { color: #4af626; }
+.terminal-line.error { color: #ff5f56; }
+.terminal-line.user { color: #f1f1f1; }
+.terminal-line.output { color: #00d2ff; }
+
+.terminal-input-line {
+  display: flex;
+  margin-top: 5px;
+}
+
+.terminal-input-line .prompt {
+  color: #4af626;
+  margin-right: 8px;
+  white-space: pre;
+}
+
+.terminal-input-line input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: inherit;
+  flex-grow: 1;
+  outline: none;
+}
