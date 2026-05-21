@@ -8,7 +8,6 @@
   font-size: 2rem;
   margin-bottom: 2rem;
   color: var(--color-primary);
-  text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
 }
 
 .stats-grid {
