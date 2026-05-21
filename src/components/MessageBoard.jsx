@@ -1,52 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquarePlus, X } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
+import { db } from '../firebase';
+import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import './MessageBoard.css';
 
-const initialMessages = [
-  { id: 1, author: 'Mostafa', text: 'We finally made it! Best class ever.', color: '#ffd3b6' },
-  { id: 2, author: 'Ahmed', text: 'I will miss our late night debugging sessions.', color: '#d4f0f0' },
-  { id: 3, author: 'Sara', text: 'Congrats Class of 2027! 🎉', color: '#ffaaa5' },
-  { id: 4, author: 'Kareem', text: 'Time to build the future!', color: '#a8e6cf' },
-];
-
 const MessageBoard = () => {
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAuthor, setNewAuthor] = useState('');
   const [newText, setNewText] = useState('');
-  const [newImageUrl, setNewImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const colors = ['#ffd3b6', '#d4f0f0', '#ffaaa5', '#a8e6cf', '#fdffab'];
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const msgs = [];
+      querySnapshot.forEach((doc) => {
+        msgs.push({ id: doc.id, ...doc.data() });
+      });
+      setMessages(msgs);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newAuthor.trim() || !newText.trim()) return;
 
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    const newMessage = {
-      id: Date.now(),
-      author: newAuthor,
-      text: newText,
-      color: randomColor,
-      imageUrl: newImageUrl.trim(),
-    };
+    setIsSubmitting(true);
+    let uploadedImageUrl = null;
 
-    setMessages([...messages, newMessage]);
+    if (imageFile) {
+      try {
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 800,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(imageFile, options);
+        
+        // Upload to ImgBB
+        const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
+        if (!apiKey) {
+          throw new Error("ImgBB API key is missing. Please add VITE_IMGBB_API_KEY to your .env file.");
+        }
+
+        const formData = new FormData();
+        formData.append('image', compressedFile);
+
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          uploadedImageUrl = data.data.url;
+        } else {
+          console.error("ImgBB upload failed:", data);
+        }
+      } catch (error) {
+        console.error("Error compressing or uploading image:", error);
+      }
+    }
+
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    try {
+      await addDoc(collection(db, 'messages'), {
+        author: newAuthor,
+        text: newText,
+        color: randomColor,
+        imageUrl: uploadedImageUrl,
+        createdAt: Date.now(),
+      });
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
+
     setNewAuthor('');
     setNewText('');
-    setNewImageUrl('');
+    setImageFile(null);
+    setIsSubmitting(false);
     setIsModalOpen(false);
   };
 
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewImageUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      setImageFile(e.target.files[0]);
     }
   };
 
@@ -61,29 +107,33 @@ const MessageBoard = () => {
       </div>
 
       <div className="notes-grid">
-        {messages.map((msg) => (
-          <div key={msg.id} className="sticky-note" style={{ backgroundColor: msg.color }}>
-            <div className="pin"></div>
-            {msg.imageUrl && (
-              <div 
-                className="note-image" 
-                onClick={() => setSelectedImage(msg.imageUrl)}
-                style={{ cursor: 'pointer' }}
-                title="Click to expand"
-              >
-                <img src={msg.imageUrl} alt="Attachment" />
-              </div>
-            )}
-            <p className="note-text">"{msg.text}"</p>
-            <p className="note-author">- {msg.author}</p>
-          </div>
-        ))}
+        {messages.length === 0 ? (
+          <p style={{ color: '#888' }}>No notes yet. Be the first to sign the yearbook!</p>
+        ) : (
+          messages.map((msg) => (
+            <div key={msg.id} className="sticky-note" style={{ backgroundColor: msg.color }}>
+              <div className="pin"></div>
+              {msg.imageUrl && (
+                <div 
+                  className="note-image" 
+                  onClick={() => setSelectedImage(msg.imageUrl)}
+                  style={{ cursor: 'pointer' }}
+                  title="Click to expand"
+                >
+                  <img src={msg.imageUrl} alt="Attachment" />
+                </div>
+              )}
+              <p className="note-text">"{msg.text}"</p>
+              <p className="note-author">- {msg.author}</p>
+            </div>
+          ))
+        )}
       </div>
 
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <button className="close-modal-btn" onClick={() => setIsModalOpen(false)}>
+            <button className="close-modal-btn" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
               <X size={24} />
             </button>
             <h3 className="modal-title">Leave a Message</h3>
@@ -97,6 +147,7 @@ const MessageBoard = () => {
                   placeholder="John Doe"
                   maxLength={20}
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="form-group">
@@ -108,6 +159,7 @@ const MessageBoard = () => {
                   maxLength={120}
                   rows={4}
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="form-group">
@@ -117,10 +169,11 @@ const MessageBoard = () => {
                   accept="image/*"
                   onChange={handleImageUpload}
                   style={{ padding: '0.5rem', background: '#2a2a2a' }}
+                  disabled={isSubmitting}
                 />
               </div>
-              <button type="submit" className="btn btn-primary submit-note-btn">
-                Post Note
+              <button type="submit" className="btn btn-primary submit-note-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Posting...' : 'Post Note'}
               </button>
             </form>
           </div>
