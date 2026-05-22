@@ -94,3 +94,18 @@
   min-width: 0;
   outline: none;
 }
+
+@media (max-width: 480px) {
+  .terminal-container {
+    margin: 1rem 0;
+    border-radius: 8px;
+  }
+  .terminal-body {
+    padding: 10px;
+    font-size: 0.8rem;
+    height: 200px;
+  }
+  .terminal-input-line .prompt {
+    margin-right: 4px;
+  }
+}

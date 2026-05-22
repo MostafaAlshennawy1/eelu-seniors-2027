@@ -80,23 +80,25 @@
 }
 
 @media (max-width: 480px) {
-  .countdown-number {
-    font-size: 36px;
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0;
   }
-}
-
-.countdown-label {
-  font-family: var(--font-label);
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 8px;
-  opacity: 0.9;
-}
-
-@media (max-width: 768px) {
+  
+  .countdown-box {
+    padding: 16px 10px;
+    max-width: none;
+    flex: none;
+  }
+  
+  .countdown-number {
+    font-size: 28px;
+  }
+  
   .countdown-label {
-    font-size: 12px;
+    font-size: 10px;
+    margin-top: 4px;
   }
 }
