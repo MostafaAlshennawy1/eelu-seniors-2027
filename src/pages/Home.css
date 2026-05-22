@@ -87,8 +87,11 @@
 
 @media (max-width: 768px) {
   .hero-section {
-    padding: 20px 0 40px;
-    min-height: auto;
+    padding: 20px 0;
+    min-height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
   
   .hero-title {
@@ -96,7 +99,8 @@
   }
   
   .hero-action {
-    margin-top: 40px;
+    margin-top: 15vh;
+    width: 100%;
   }
   
   .btn-large {
