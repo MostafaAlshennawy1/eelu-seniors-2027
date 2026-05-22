@@ -7,6 +7,8 @@
   margin: 2rem 0;
   border: 1px solid #333;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .terminal-header {
@@ -87,5 +89,6 @@
   font-family: inherit;
   font-size: inherit;
   flex-grow: 1;
+  min-width: 0;
   outline: none;
 }

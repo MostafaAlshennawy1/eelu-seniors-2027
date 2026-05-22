@@ -35,7 +35,7 @@
   border-radius: 4px;
   box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.2);
   position: relative;
-  min-height: 180px;
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s;
