@@ -77,30 +77,34 @@
 .terminal-input-line {
   display: flex;
   margin-top: 5px;
+  flex-wrap: wrap;
 }
 
 .terminal-input-line .prompt {
   color: #4af626;
   margin-right: 8px;
-  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .input-wrapper {
   position: relative;
   flex-grow: 1;
-  display: flex;
-  align-items: center;
+  display: inline-block;
+  min-width: 0;
 }
 
 .input-text {
   color: #fff;
-  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .terminal-placeholder {
   color: #666;
   font-style: italic;
   user-select: none;
+  white-space: normal;
 }
 
 .blinking-cursor {
