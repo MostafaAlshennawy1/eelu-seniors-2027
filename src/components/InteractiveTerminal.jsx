@@ -9,6 +9,7 @@ const InteractiveTerminal = () => {
   ]);
   const [input, setInput] = useState('');
   const bodyRef = useRef(null);
+  const inputRef = useRef(null);
 
   const handleCommand = (cmd) => {
     const trimmed = cmd.trim();
@@ -47,8 +48,20 @@ const InteractiveTerminal = () => {
     }
   }, [history]);
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+    }
+  }, []);
+
+  const handleBodyClick = () => {
+    if (inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+    }
+  };
+
   return (
-    <div className="terminal-container">
+    <div className="terminal-container" onClick={handleBodyClick}>
       <div className="terminal-header">
         <div className="terminal-dots">
           <span className="dot close"></span>
@@ -65,16 +78,24 @@ const InteractiveTerminal = () => {
         ))}
         <div className="terminal-input-line">
           <span className="prompt">root@eelu:~# </span>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCommand(input);
-            }}
-            autoComplete="off"
-            spellCheck="false"
-          />
+          <div className="input-wrapper">
+            <span className="input-text">
+              {input ? input : <span className="terminal-placeholder">Type /help to see commands...</span>}
+            </span>
+            <span className="blinking-cursor">|</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCommand(input);
+              }}
+              autoComplete="off"
+              spellCheck="false"
+              className="hidden-input"
+            />
+          </div>
         </div>
       </div>
     </div>
