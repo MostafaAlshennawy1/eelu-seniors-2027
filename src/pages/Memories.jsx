@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import { Upload } from 'lucide-react';
 import LightboxGallery from '../components/LightboxGallery';
 import './Memories.css';
 
@@ -19,7 +20,7 @@ const Memories = () => {
 
     const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
-    const interval = setInterval(function() {
+    const interval = setInterval(function () {
       const timeLeft = animationEnd - Date.now();
 
       if (timeLeft <= 0) {
@@ -46,10 +47,22 @@ const Memories = () => {
     <div className="memories-page">
       <div className="container">
         <div className="memories-header">
-          <h1 className="headline-lg text-primary">Class Gallery</h1>
-          <p className="body-lg text-outline">
-            Memories from every branch of EELU Computer Science Class of 2027.
-          </p>
+          <div className="memories-header-content">
+            <h1 className="headline-lg text-primary">Class Gallery</h1>
+            <p className="body-lg text-outline">
+              Memories from every branch of EELU Computer Science Class of 2027.
+            </p>
+          </div>
+          <a 
+            href="https://mostafaalshennawy1.github.io/Seniors-2027-Gallery/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="btn btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+          >
+            <Upload size={20} />
+            Upload Memory
+          </a>
         </div>
 
         <div className="tabs-container">
