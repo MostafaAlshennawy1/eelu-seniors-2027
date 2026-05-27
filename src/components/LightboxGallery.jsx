@@ -87,8 +87,8 @@ const LightboxGallery = ({ activeTab }) => {
 
     // Sort to ensure Mostafa Alshennawy is displayed first
     filteredImages.sort((a, b) => {
-      const isMostafaA = a.studentName.includes('Mostafa');
-      const isMostafaB = b.studentName.includes('Mostafa');
+      const isMostafaA = a.studentName.toLowerCase().includes('mostafa alshennawy');
+      const isMostafaB = b.studentName.toLowerCase().includes('mostafa alshennawy');
       if (isMostafaA && !isMostafaB) return -1;
       if (!isMostafaA && isMostafaB) return 1;
       return 0;
