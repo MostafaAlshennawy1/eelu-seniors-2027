@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, GraduationCap } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, GraduationCap, Edit2, Trash2 } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, orderBy, deleteDoc, updateDoc, doc } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
 import './LightboxGallery.css';
 
 // Dynamically import all images in the src/assets/imgs directory
@@ -13,6 +14,7 @@ const LightboxGallery = ({ activeTab }) => {
   const [firebaseImages, setFirebaseImages] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { isAdmin } = useAuth();
 
   const branches = [
     'Assiut', 'Ain_shams', 'Alex', 'Sohag', 'Menoufia', 'Tanta',
@@ -63,6 +65,7 @@ const LightboxGallery = ({ activeTab }) => {
         const normalizedBranch = data.branch ? data.branch.replace(' ', '_') : 'Unknown';
         
         remote.push({
+          id: doc.id,
           src: data.imageUrl,
           alt: `${data.name} - ${normalizedBranch} Branch`,
           branch: normalizedBranch,
@@ -132,6 +135,31 @@ const LightboxGallery = ({ activeTab }) => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const handleEdit = async (img, e) => {
+    e.stopPropagation();
+    if (!img.id) return alert("Cannot edit local placeholder images");
+    const newName = prompt("Enter new name:", img.studentName);
+    if (newName && newName !== img.studentName) {
+      try {
+        await updateDoc(doc(db, 'uploads', img.id), { name: newName });
+      } catch (error) {
+        console.error("Error updating:", error);
+      }
+    }
+  };
+
+  const handleDelete = async (img, e) => {
+    e.stopPropagation();
+    if (!img.id) return alert("Cannot delete local placeholder images");
+    if (window.confirm("Are you sure you want to delete this memory?")) {
+      try {
+        await deleteDoc(doc(db, 'uploads', img.id));
+      } catch (error) {
+        console.error("Error deleting:", error);
+      }
+    }
+  };
+
   return (
     <div className="gallery-container">
       <div className="gallery-grid">
@@ -143,6 +171,12 @@ const LightboxGallery = ({ activeTab }) => {
           >
             <div className="scrapbook-title">{img.studentName}</div>
             <div className="gallery-item polaroid-frame">
+              {isAdmin && img.id && (
+                <div className="admin-gallery-controls">
+                  <button onClick={(e) => handleEdit(img, e)} className="admin-btn edit-btn" title="Edit Name"><Edit2 size={16} /></button>
+                  <button onClick={(e) => handleDelete(img, e)} className="admin-btn delete-btn" title="Delete Memory"><Trash2 size={16} /></button>
+                </div>
+              )}
               <div className="grad-cap-decoration">
                 <GraduationCap size={40} strokeWidth={1.5} color="#111" fill="#111" />
               </div>

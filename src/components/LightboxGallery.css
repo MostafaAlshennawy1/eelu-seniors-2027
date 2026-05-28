@@ -276,3 +276,33 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+.admin-gallery-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+
+.admin-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  color: #333;
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+.delete-btn:hover {
+  color: #ef4444;
+}

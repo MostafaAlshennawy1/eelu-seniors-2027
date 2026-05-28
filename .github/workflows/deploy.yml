@@ -31,7 +31,9 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          VITE_IMGBB_API_KEY: "621e447900d1c3ae44345ac65a6140d0"
+          VITE_IMGBB_API_KEY: ${{ secrets.VITE_IMGBB_API_KEY }}
+          VITE_ADMIN_USERNAME: ${{ secrets.VITE_ADMIN_USERNAME }}
+          VITE_ADMIN_PASSWORD: ${{ secrets.VITE_ADMIN_PASSWORD }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

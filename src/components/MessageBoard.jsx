@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquarePlus, X } from 'lucide-react';
+import { MessageSquarePlus, X, Edit2, Trash2 } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { db } from '../firebase';
-import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, updateDoc, doc } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
 import './MessageBoard.css';
 
 const MessageBoard = () => {
@@ -13,6 +14,8 @@ const MessageBoard = () => {
   const [imageFile, setImageFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const { isAdmin } = useAuth();
 
   const colors = ['#ffd3b6', '#d4f0f0', '#ffaaa5', '#a8e6cf', '#fdffab'];
 
@@ -27,6 +30,23 @@ const MessageBoard = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      try {
+        await deleteDoc(doc(db, 'messages', id));
+      } catch (error) {
+        console.error("Error deleting document:", error);
+      }
+    }
+  };
+
+  const handleEdit = (msg) => {
+    setEditingMessage(msg);
+    setNewAuthor(msg.author);
+    setNewText(msg.text);
+    setIsModalOpen(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +63,7 @@ const MessageBoard = () => {
           useWebWorker: true,
         };
         const compressedFile = await imageCompression(imageFile, options);
-        
+
         // Upload to ImgBB
         const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
         if (!apiKey) {
@@ -69,23 +89,38 @@ const MessageBoard = () => {
       }
     }
 
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    
-    try {
-      await addDoc(collection(db, 'messages'), {
-        author: newAuthor,
-        text: newText,
-        color: randomColor,
-        imageUrl: uploadedImageUrl,
-        createdAt: Date.now(),
-      });
-    } catch (error) {
-      console.error("Error adding document: ", error);
+    if (editingMessage) {
+      try {
+        const updateData = {
+          author: newAuthor,
+          text: newText,
+        };
+        if (uploadedImageUrl) {
+          updateData.imageUrl = uploadedImageUrl;
+        }
+        await updateDoc(doc(db, 'messages', editingMessage.id), updateData);
+      } catch (error) {
+        console.error("Error updating document: ", error);
+      }
+    } else {
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      try {
+        await addDoc(collection(db, 'messages'), {
+          author: newAuthor,
+          text: newText,
+          color: randomColor,
+          imageUrl: uploadedImageUrl,
+          createdAt: Date.now(),
+        });
+      } catch (error) {
+        console.error("Error adding document: ", error);
+      }
     }
 
     setNewAuthor('');
     setNewText('');
     setImageFile(null);
+    setEditingMessage(null);
     setIsSubmitting(false);
     setIsModalOpen(false);
   };
@@ -100,7 +135,12 @@ const MessageBoard = () => {
     <div className="message-board-container">
       <div className="board-header">
         <h2 className="board-title">Sign Our Digital Yearbook</h2>
-        <button className="btn btn-primary add-note-btn" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary add-note-btn" onClick={() => {
+          setEditingMessage(null);
+          setNewAuthor('');
+          setNewText('');
+          setIsModalOpen(true);
+        }}>
           <MessageSquarePlus size={20} />
           Leave a Note
         </button>
@@ -113,9 +153,15 @@ const MessageBoard = () => {
           messages.map((msg) => (
             <div key={msg.id} className="sticky-note" style={{ backgroundColor: msg.color }}>
               <div className="pin"></div>
+              {isAdmin && (
+                <div className="admin-note-controls">
+                  <button onClick={() => handleEdit(msg)} className="admin-btn edit-btn" title="Edit Note"><Edit2 size={16} /></button>
+                  <button onClick={() => handleDelete(msg.id)} className="admin-btn delete-btn" title="Delete Note"><Trash2 size={16} /></button>
+                </div>
+              )}
               {msg.imageUrl && (
-                <div 
-                  className="note-image" 
+                <div
+                  className="note-image"
                   onClick={() => setSelectedImage(msg.imageUrl)}
                   style={{ cursor: 'pointer' }}
                   title="Click to expand"
@@ -133,10 +179,15 @@ const MessageBoard = () => {
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <button className="close-modal-btn" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
+            <button className="close-modal-btn" onClick={() => {
+              setIsModalOpen(false);
+              setEditingMessage(null);
+              setNewAuthor('');
+              setNewText('');
+            }} disabled={isSubmitting}>
               <X size={24} />
             </button>
-            <h3 className="modal-title">Leave a Message</h3>
+            <h3 className="modal-title">{editingMessage ? 'Edit Message' : 'Leave a Message'}</h3>
             <form onSubmit={handleSubmit} className="note-form">
               <div className="form-group">
                 <label>Your Name</label>
@@ -173,7 +224,7 @@ const MessageBoard = () => {
                 />
               </div>
               <button type="submit" className="btn btn-primary submit-note-btn" disabled={isSubmitting}>
-                {isSubmitting ? 'Posting...' : 'Post Note'}
+                {isSubmitting ? (editingMessage ? 'Updating...' : 'Posting...') : (editingMessage ? 'Update Note' : 'Post Note')}
               </button>
             </form>
           </div>
@@ -186,10 +237,10 @@ const MessageBoard = () => {
             <X size={36} />
           </button>
           <div className="lightbox-image-container" onClick={(e) => e.stopPropagation()}>
-            <img 
-              src={selectedImage} 
-              alt="Expanded note attachment" 
-              style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 10px 40px rgba(0,0,0,0.8)' }} 
+            <img
+              src={selectedImage}
+              alt="Expanded note attachment"
+              style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 10px 40px rgba(0,0,0,0.8)' }}
             />
           </div>
         </div>
