@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, GraduationCap, Edit2, Trash2 } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, where, orderBy, deleteDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, orderBy, deleteDoc, updateDoc, doc, limit } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import './LightboxGallery.css';
 
@@ -14,6 +14,9 @@ const LightboxGallery = ({ activeTab }) => {
   const [firebaseImages, setFirebaseImages] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [fetchLimit, setFetchLimit] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
+  const observerTarget = useRef(null);
   const { isAdmin } = useAuth();
 
   const branches = [
@@ -55,7 +58,8 @@ const LightboxGallery = ({ activeTab }) => {
     // For simplicity and avoiding index errors, we'll fetch by 'where' and sort in JS.
     const q = query(
       collection(db, 'uploads'),
-      where('type', '==', 'Memories Gallery')
+      where('type', '==', 'Memories Gallery'),
+      limit(fetchLimit)
     );
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -74,13 +78,16 @@ const LightboxGallery = ({ activeTab }) => {
         });
       });
       
+      // If the number of documents returned equals the limit, there might be more
+      setHasMore(querySnapshot.docs.length === fetchLimit);
+      
       // Sort in JS to avoid needing a composite index in Firestore
       remote.sort((a, b) => b.createdAt - a.createdAt);
       
       setFirebaseImages(remote);
     });
     return () => unsubscribe();
-  }, []);
+  }, [fetchLimit]);
 
   // Combine and filter images whenever activeTab, localImages, or firebaseImages change
   useEffect(() => {
@@ -160,6 +167,27 @@ const LightboxGallery = ({ activeTab }) => {
     }
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setFetchLimit((prev) => prev + 20);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, observerTarget]);
+
   return (
     <div className="gallery-container">
       <div className="gallery-grid">
@@ -205,6 +233,13 @@ const LightboxGallery = ({ activeTab }) => {
           </div>
         ))}
       </div>
+
+      {hasMore && (
+        <div ref={observerTarget} style={{ height: '40px', width: '100%', margin: '2rem 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="loading-spinner" style={{ width: '30px', height: '30px', border: '3px solid var(--primary-container)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
 
       {lightboxOpen && images.length > 0 && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
