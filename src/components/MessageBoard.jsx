@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquarePlus, X, Edit2, Trash2 } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { db } from '../firebase';
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, updateDoc, doc, limit } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import './MessageBoard.css';
 
@@ -15,21 +15,46 @@ const MessageBoard = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
+  const [fetchLimit, setFetchLimit] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
+  const observerTarget = useRef(null);
   const { isAdmin } = useAuth();
 
   const colors = ['#ffd3b6', '#d4f0f0', '#ffaaa5', '#a8e6cf', '#fdffab'];
 
   useEffect(() => {
-    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'), limit(fetchLimit));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const msgs = [];
       querySnapshot.forEach((doc) => {
         msgs.push({ id: doc.id, ...doc.data() });
       });
+      setHasMore(querySnapshot.docs.length === fetchLimit);
       setMessages(msgs);
     });
     return () => unsubscribe();
-  }, []);
+  }, [fetchLimit]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setFetchLimit((prev) => prev + 20);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, observerTarget]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this note?')) {
@@ -175,6 +200,13 @@ const MessageBoard = () => {
           ))
         )}
       </div>
+
+      {hasMore && (
+        <div ref={observerTarget} style={{ height: '40px', width: '100%', margin: '2rem 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="loading-spinner" style={{ width: '30px', height: '30px', border: '3px solid var(--primary-container)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay">
