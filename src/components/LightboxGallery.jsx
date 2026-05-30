@@ -53,12 +53,12 @@ const LightboxGallery = ({ activeTab }) => {
 
   // Listen to Firebase uploads that have the specific mark
   useEffect(() => {
-    // Note: If combining 'where' and 'orderBy' on different fields requires an index,
-    // we can omit orderBy here and just sort in JS, or assume the index exists.
-    // For simplicity and avoiding index errors, we'll fetch by 'where' and sort in JS.
+    // We MUST use orderBy to ensure pagination grabs the correct images in order.
+    // This requires a composite index in Firebase!
     const q = query(
       collection(db, 'uploads'),
       where('type', '==', 'Memories Gallery'),
+      orderBy('createdAt', 'desc'),
       limit(fetchLimit)
     );
     
