@@ -82,12 +82,32 @@ const MessageBoard = () => {
 
     if (imageFile) {
       try {
+        let fileToCompress = imageFile;
+        const isHeic =
+          imageFile.type === 'image/heic' ||
+          imageFile.type === 'image/heif' ||
+          imageFile.name.toLowerCase().endsWith('.heic') ||
+          imageFile.name.toLowerCase().endsWith('.heif');
+
+        if (isHeic) {
+          const heic2any = (await import('heic2any')).default;
+          const convertedBlob = await heic2any({
+            blob: imageFile,
+            toType: 'image/jpeg',
+            quality: 0.8
+          });
+          const blobToUse = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+          fileToCompress = new File([blobToUse], imageFile.name.replace(/\.hei[cf]$/i, '.jpg'), {
+            type: 'image/jpeg',
+          });
+        }
+
         const options = {
           maxSizeMB: 0.5,
           maxWidthOrHeight: 800,
           useWebWorker: true,
         };
-        const compressedFile = await imageCompression(imageFile, options);
+        const compressedFile = await imageCompression(fileToCompress, options);
 
         // Upload to ImgBB
         const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
