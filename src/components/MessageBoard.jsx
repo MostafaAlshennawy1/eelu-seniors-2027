@@ -90,7 +90,9 @@ const MessageBoard = () => {
           imageFile.name.toLowerCase().endsWith('.heif');
 
         if (isHeic) {
-          const heic2any = (await import('heic2any')).default;
+          const heicModule = await import('heic2any');
+          const heic2any = heicModule.default || heicModule;
+          
           const convertedBlob = await heic2any({
             blob: imageFile,
             toType: 'image/jpeg',
@@ -127,10 +129,13 @@ const MessageBoard = () => {
         if (data.success) {
           uploadedImageUrl = data.data.url;
         } else {
-          console.error("ImgBB upload failed:", data);
+          throw new Error(data.error?.message || "ImgBB upload failed");
         }
       } catch (error) {
         console.error("Error compressing or uploading image:", error);
+        alert(`Failed to process or upload image: ${error.message || error}\nPlease try a different image format.`);
+        setIsSubmitting(false);
+        return; // Stop submission if image fails
       }
     }
 
