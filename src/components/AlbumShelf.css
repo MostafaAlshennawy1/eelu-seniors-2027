@@ -1,0 +1,247 @@
+/* ── Shelf Container ──────────────────────────────────── */
+.album-shelf {
+  background: linear-gradient(135deg, var(--primary-container) 0%, var(--surface-container-low) 100%);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--rounded-lg);
+  padding: 16px 20px 20px;
+  margin-bottom: 36px;
+  overflow: hidden;
+}
+
+/* ── Header row ───────────────────────────────────────── */
+.album-shelf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.album-shelf-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+/* ── Admin Add Button ─────────────────────────────────── */
+.album-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  border-radius: var(--rounded-full);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.4);
+  white-space: nowrap;
+}
+
+.album-add-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.5);
+}
+
+/* ── Empty state ──────────────────────────────────────── */
+.album-shelf-empty {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  padding: 12px 0;
+}
+
+/* ── Horizontal scroll track ──────────────────────────── */
+.album-shelf-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.album-shelf-track::-webkit-scrollbar {
+  height: 4px;
+}
+.album-shelf-track::-webkit-scrollbar-track {
+  background: var(--surface-container);
+  border-radius: 4px;
+}
+.album-shelf-track::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 4px;
+}
+
+/* ── Album Chip Card ──────────────────────────────────── */
+.album-chip {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-container-lowest);
+  border: 1.5px solid var(--outline-variant);
+  border-radius: var(--rounded-md);
+  padding: 10px 14px 10px 10px;
+  cursor: pointer;
+  min-width: 200px;
+  max-width: 260px;
+  position: relative;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+}
+
+.album-chip:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px -6px rgba(59, 130, 246, 0.22);
+  transform: translateY(-2px);
+}
+
+.album-chip.active {
+  border-color: var(--primary);
+  background: var(--primary-container);
+  box-shadow: 0 0 0 2px var(--primary), 0 8px 24px -4px rgba(59, 130, 246, 0.35);
+}
+
+.album-chip-active-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.album-clear-selection-btn {
+  background: var(--primary-container);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.album-clear-selection-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ── Cover thumbnail ──────────────────────────────────── */
+.album-chip-cover {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--rounded);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface-container);
+}
+
+.album-chip-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.album-chip:hover .album-chip-cover img {
+  transform: scale(1.08);
+}
+
+.album-chip-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  background: var(--primary-container);
+}
+
+/* ── Info ─────────────────────────────────────────────── */
+.album-chip-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.album-chip-title {
+  font-family: var(--font-headline);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.album-chip-desc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Album Chip Controls (Edit & Remove) ─────────────── */
+.album-chip-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.85;
+  transition: opacity 0.2s, transform 0.2s;
+  margin-left: 4px;
+}
+
+.album-chip:hover .album-chip-controls {
+  opacity: 1;
+}
+
+.album-chip-btn {
+  background: var(--surface-container-high);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--rounded-full);
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--on-surface-variant);
+  transition: all 0.2s ease;
+}
+
+.album-chip-btn:hover {
+  transform: scale(1.1);
+}
+
+.album-chip-btn.edit:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.album-chip-btn.delete:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}

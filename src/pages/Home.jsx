@@ -1,17 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera } from 'lucide-react';
+import { Camera, Plus } from 'lucide-react';
 import Countdown from '../components/Countdown';
 import HorizontalTimeline from '../components/HorizontalTimeline';
 import InteractiveTerminal from '../components/InteractiveTerminal';
 import BranchStats from '../components/BranchStats';
 import MessageBoard from '../components/MessageBoard';
+import AlbumShelf from '../components/AlbumShelf';
+import AddAlbumModal from '../components/AddAlbumModal';
+import { useAuth } from '../context/AuthContext';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
+  const [showAddAlbum, setShowAddAlbum] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
   // June 10, 2027
   const graduationDate = '2027-06-10T00:00:00';
+
+  const handleSelectAlbum = (album) => {
+    setSelectedAlbum(album);
+    // Smooth scroll down to digital yearbook section when album selected
+    if (album) {
+      setTimeout(() => {
+        const boardEl = document.getElementById('digital-yearbook-section');
+        if (boardEl) {
+          boardEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
 
   return (
     <div className="home-page">
@@ -60,12 +79,46 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Message Board Section */}
-      <section className="message-board-section">
+      {/* Albums Section — before Digital Yearbook sticky notes */}
+      <section className="albums-section">
         <div className="container">
-          <MessageBoard />
+          <div className="section-header albums-section-header">
+            <div>
+              <h2 className="headline-lg text-primary">Digital Yearbook Albums</h2>
+              <p className="body-md text-outline">Click an album to display its photos in the Digital Yearbook below.</p>
+            </div>
+            {isAdmin && (
+              <button
+                className="btn btn-primary home-add-album-btn"
+                onClick={() => setShowAddAlbum(true)}
+              >
+                <Plus size={18} />
+                New Album
+              </button>
+            )}
+          </div>
+          <AlbumShelf
+            selectedAlbum={selectedAlbum}
+            onSelectAlbum={handleSelectAlbum}
+            onAddAlbum={() => setShowAddAlbum(true)}
+          />
         </div>
       </section>
+
+      {/* Message Board Section — Digital Yearbook sticky notes */}
+      <section className="message-board-section">
+        <div className="container">
+          <MessageBoard
+            selectedAlbum={selectedAlbum}
+            onClearAlbum={() => setSelectedAlbum(null)}
+          />
+        </div>
+      </section>
+
+      {/* Add Album Modal */}
+      {showAddAlbum && (
+        <AddAlbumModal onClose={() => setShowAddAlbum(false)} />
+      )}
     </div>
   );
 };

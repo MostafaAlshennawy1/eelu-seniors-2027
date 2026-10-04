@@ -12,16 +12,135 @@
   gap: 1rem;
 }
 
-.board-title {
-  font-size: 2rem;
-  color: var(--color-primary);
-  margin: 0;
+.board-subtitle {
+  color: var(--on-surface-variant);
+  font-size: 1rem;
+  margin-top: 0.25rem;
 }
 
-.add-note-btn {
+/* ── Album Active Header ───────────────────────── */
+.album-active-header {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);
+  border: 1px solid var(--primary-container);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.album-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.album-active-desc {
+  color: var(--on-surface-variant);
+  font-size: 0.95rem;
+  margin-top: 0.4rem;
+}
+
+.album-header-actions {
   display: flex;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.return-main-btn {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--outline-variant);
+  color: var(--on-surface);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.return-main-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  transform: translateX(-2px);
+}
+
+.album-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--outline-variant);
+  color: var(--on-surface);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.album-action-btn:hover {
+  background: var(--primary-container);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.album-action-btn.delete:hover {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* ── Album Bottom Navigation ─────────────────────── */
+.album-bottom-nav {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+  padding: 1.5rem;
+}
+
+.return-main-btn-bottom {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 30px;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.return-main-btn-bottom:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.45);
+}
+
+.empty-album-sticky {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.empty-note {
+  max-width: 380px;
+  text-align: center;
+  align-items: center;
+  background: #fff8dc;
 }
 
 .notes-grid {

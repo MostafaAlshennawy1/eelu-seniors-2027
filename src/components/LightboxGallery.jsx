@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, GraduationCap, Edit2, Trash2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, GraduationCap, Edit2, Trash2, Search } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, where, orderBy, deleteDoc, updateDoc, doc, limit } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -8,10 +8,15 @@ import './LightboxGallery.css';
 // Dynamically import all images in the src/assets/imgs directory
 const imagesImport = import.meta.glob('../assets/imgs/**/*.{png,jpg,jpeg,webp,gif}', { eager: true });
 
-const LightboxGallery = ({ activeTab }) => {
-  const [images, setImages] = useState([]);
+// Only Assiut branch
+const ACTIVE_BRANCH = 'Assiut';
+
+const LightboxGallery = () => {
+  const [allImages, setAllImages] = useState([]);
+  const [displayImages, setDisplayImages] = useState([]);
   const [localImages, setLocalImages] = useState([]);
   const [firebaseImages, setFirebaseImages] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fetchLimit, setFetchLimit] = useState(20);
@@ -19,84 +24,69 @@ const LightboxGallery = ({ activeTab }) => {
   const observerTarget = useRef(null);
   const { isAdmin } = useAuth();
 
-  const branches = [
-    'Assiut', 'Ain_shams', 'Alex', 'Sohag', 'Menoufia', 'Tanta',
-    'Ismailia', 'Fayoum', 'Beni_Suef', 'Minya', 'Qena', 'Hurghada', 'Sadat'
-  ];
-
-  // Load local images once
+  // Load local images once — only Assiut
   useEffect(() => {
     let loadedImages = [];
     for (const path in imagesImport) {
       const module = imagesImport[path];
-      let branchName = 'Unknown';
-      for (const branch of branches) {
-        if (path.includes(`/${branch}/`)) {
-          branchName = branch;
-          break;
-        }
-      }
+      if (!path.includes(`/${ACTIVE_BRANCH}/`)) continue;
+
       const filename = path.split('/').pop();
-      const nameWithoutExtension = filename.replace(/\.[^/.]+$/, "");
-      const studentName = nameWithoutExtension.replace(/[_-]/g, " ");
+      const nameWithoutExtension = filename.replace(/\.[^/.]+$/, '');
+      const studentName = nameWithoutExtension.replace(/[_-]/g, ' ');
 
       loadedImages.push({
         src: module.default,
-        alt: `${studentName} - ${branchName} Branch`,
-        branch: branchName,
+        alt: `${studentName} - ${ACTIVE_BRANCH} Branch`,
+        branch: ACTIVE_BRANCH,
         studentName: studentName,
-        createdAt: 0 // Give local images an arbitrary old timestamp
+        createdAt: 0,
       });
     }
     setLocalImages(loadedImages);
   }, []);
 
-  // Listen to Firebase uploads that have the specific mark
+  // Listen to Firebase uploads for Assiut only
   useEffect(() => {
-    // We MUST use orderBy to ensure pagination grabs the correct images in order.
-    // This requires a composite index in Firebase!
     const q = query(
       collection(db, 'uploads'),
       where('type', '==', 'Memories Gallery'),
       orderBy('createdAt', 'desc'),
       limit(fetchLimit)
     );
-    
+
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       let remote = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
         const normalizedBranch = data.branch ? data.branch.replace(' ', '_') : 'Unknown';
-        
+        // Only include Assiut images
+        if (normalizedBranch !== ACTIVE_BRANCH) return;
+
         remote.push({
-          id: doc.id,
+          id: docSnap.id,
           src: data.imageUrl,
           alt: `${data.name} - ${normalizedBranch} Branch`,
           branch: normalizedBranch,
           studentName: data.name,
-          createdAt: data.createdAt || 0
+          createdAt: data.createdAt || 0,
         });
       });
-      
-      // If the number of documents returned equals the limit, there might be more
+
       setHasMore(querySnapshot.docs.length === fetchLimit);
-      
-      // Sort in JS to avoid needing a composite index in Firestore
       remote.sort((a, b) => b.createdAt - a.createdAt);
-      
       setFirebaseImages(remote);
     });
+
     return () => unsubscribe();
   }, [fetchLimit]);
 
-  // Combine and filter images whenever activeTab, localImages, or firebaseImages change
+  // Combine Firebase + local images
   useEffect(() => {
-    const targetBranches = activeTab === 'All' ? branches : [activeTab];
-    let combined = [...firebaseImages, ...localImages]; // Firebase images first
-    let filteredImages = combined.filter(img => targetBranches.includes(img.branch));
+    let combined = [...firebaseImages, ...localImages];
 
-    // Sort to ensure Mostafa Alshennawy is displayed first
-    filteredImages.sort((a, b) => {
+    // Mostafa Alshennawy always first
+    combined.sort((a, b) => {
       const isMostafaA = a.studentName.toLowerCase().includes('mostafa alshennawy');
       const isMostafaB = b.studentName.toLowerCase().includes('mostafa alshennawy');
       if (isMostafaA && !isMostafaB) return -1;
@@ -104,22 +94,34 @@ const LightboxGallery = ({ activeTab }) => {
       return 0;
     });
 
-    // If no real images exist for this tab yet, generate fallback placeholders
-    if (filteredImages.length === 0) {
-      targetBranches.forEach(branch => {
-        for (let i = 1; i <= 3; i++) {
-          filteredImages.push({
-            src: `https://via.placeholder.com/600x600/3b82f6/ffffff?text=${branch}+Student+${i}`,
-            alt: `Student ${i} - ${branch} Branch`,
-            branch: branch,
-            studentName: `Student ${i}`
-          });
-        }
-      });
+    // Fallback placeholders if empty
+    if (combined.length === 0) {
+      for (let i = 1; i <= 3; i++) {
+        combined.push({
+          src: `https://via.placeholder.com/600x600/3b82f6/ffffff?text=Assiut+Student+${i}`,
+          alt: `Student ${i} - Assiut Branch`,
+          branch: ACTIVE_BRANCH,
+          studentName: `Student ${i}`,
+        });
+      }
     }
 
-    setImages(filteredImages);
-  }, [activeTab, localImages, firebaseImages]);
+    setAllImages(combined);
+  }, [localImages, firebaseImages]);
+
+  // Real-time search filter
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      setDisplayImages(allImages);
+    } else {
+      setDisplayImages(
+        allImages.filter((img) =>
+          img.studentName.toLowerCase().includes(term)
+        )
+      );
+    }
+  }, [searchTerm, allImages]);
 
   const openLightbox = (index) => {
     setCurrentIndex(index);
@@ -134,35 +136,35 @@ const LightboxGallery = ({ activeTab }) => {
 
   const nextImage = (e) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+    setCurrentIndex((prev) => (prev + 1) % displayImages.length);
   };
 
   const prevImage = (e) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    setCurrentIndex((prev) => (prev - 1 + displayImages.length) % displayImages.length);
   };
 
   const handleEdit = async (img, e) => {
     e.stopPropagation();
-    if (!img.id) return alert("Cannot edit local placeholder images");
-    const newName = prompt("Enter new name:", img.studentName);
+    if (!img.id) return alert('Cannot edit local placeholder images');
+    const newName = prompt('Enter new name:', img.studentName);
     if (newName && newName !== img.studentName) {
       try {
         await updateDoc(doc(db, 'uploads', img.id), { name: newName });
       } catch (error) {
-        console.error("Error updating:", error);
+        console.error('Error updating:', error);
       }
     }
   };
 
   const handleDelete = async (img, e) => {
     e.stopPropagation();
-    if (!img.id) return alert("Cannot delete local placeholder images");
-    if (window.confirm("Are you sure you want to delete this memory?")) {
+    if (!img.id) return alert('Cannot delete local placeholder images');
+    if (window.confirm('Are you sure you want to delete this memory?')) {
       try {
         await deleteDoc(doc(db, 'uploads', img.id));
       } catch (error) {
-        console.error("Error deleting:", error);
+        console.error('Error deleting:', error);
       }
     }
   };
@@ -177,21 +179,40 @@ const LightboxGallery = ({ activeTab }) => {
       { threshold: 0.1 }
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
+    if (observerTarget.current) observer.observe(observerTarget.current);
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
-      }
+      if (observerTarget.current) observer.unobserve(observerTarget.current);
     };
-  }, [hasMore, observerTarget]);
+  }, [hasMore]);
 
   return (
     <div className="gallery-container">
+      {/* Real-time Search Bar */}
+      <div className="gallery-search-wrapper">
+        <div className="gallery-search-inner">
+          <Search size={18} className="gallery-search-icon" />
+          <input
+            type="text"
+            className="gallery-search-input"
+            placeholder="Search by student name…"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              className="gallery-search-clear"
+              onClick={() => setSearchTerm('')}
+              title="Clear search"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="gallery-grid">
-        {images.map((img, index) => (
+        {displayImages.map((img, index) => (
           <div
             key={index}
             className="scrapbook-wrapper"
@@ -215,33 +236,36 @@ const LightboxGallery = ({ activeTab }) => {
                 <span>7</span>
               </div>
               <div className="gallery-img-wrapper">
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  loading="lazy"
-                />
+                <img src={img.src} alt={img.alt} loading="lazy" />
                 <div className="gallery-overlay">
                   <span className="gallery-overlay-text">View Image</span>
                 </div>
               </div>
               <div className="gallery-caption">
                 <span className="student-status">SENIOR</span>
-                <span className="branch-subtitle label-caps text-primary">{img.branch.replace('_', ' ')}</span>
+                <span className="branch-subtitle label-caps text-primary">{ACTIVE_BRANCH}</span>
               </div>
             </div>
             <div className="scrapbook-quote">Time flies, but memories last forever ✨</div>
           </div>
         ))}
+
+        {displayImages.length === 0 && searchTerm && (
+          <div className="gallery-no-results">
+            <Search size={48} opacity={0.3} />
+            <p>No memories found for "<strong>{searchTerm}</strong>"</p>
+          </div>
+        )}
       </div>
 
-      {hasMore && (
+      {hasMore && !searchTerm && (
         <div ref={observerTarget} style={{ height: '40px', width: '100%', margin: '2rem 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div className="loading-spinner" style={{ width: '30px', height: '30px', border: '3px solid var(--primary-container)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
           <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
-      {lightboxOpen && images.length > 0 && (
+      {lightboxOpen && displayImages.length > 0 && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>
             <X size={32} />
@@ -253,13 +277,13 @@ const LightboxGallery = ({ activeTab }) => {
 
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <img
-              src={images[currentIndex].src}
-              alt={images[currentIndex].alt}
+              src={displayImages[currentIndex].src}
+              alt={displayImages[currentIndex].alt}
               className="lightbox-img"
             />
             <div className="lightbox-caption">
-              <span className="lightbox-student-name">{images[currentIndex].studentName}</span>
-              <span className="lightbox-branch-name">{images[currentIndex].branch.replace('_', ' ')} Branch</span>
+              <span className="lightbox-student-name">{displayImages[currentIndex].studentName}</span>
+              <span className="lightbox-branch-name">Assiut Branch</span>
             </div>
           </div>
 

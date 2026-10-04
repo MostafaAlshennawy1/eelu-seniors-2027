@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { Upload } from 'lucide-react';
 import LightboxGallery from '../components/LightboxGallery';
 import './Memories.css';
 
-const branches = [
-  'All', 'Assiut', 'Ain_shams', 'Alex', 'Sohag', 'Menoufia', 'Tanta',
-  'Ismailia', 'Fayoum', 'Beni_Suef', 'Minya', 'Qena', 'Hurghada', 'Sadat'
-];
-
 const Memories = () => {
-  const [activeTab, setActiveTab] = useState('All');
-
   useEffect(() => {
-    // Option 2 WOW Feature: Confetti Celebration Cannon
+    // Confetti Celebration Cannon
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -50,12 +43,12 @@ const Memories = () => {
           <div className="memories-header-content">
             <h1 className="headline-lg text-primary">Class Gallery</h1>
             <p className="body-lg text-outline">
-              Memories from every branch of EELU Computer Science Class of 2027.
+              Memories from EELU Computer Science Assiut Branch – Class of 2027.
             </p>
           </div>
-          <a 
-            href="https://mostafaalshennawy1.github.io/Seniors-2027-Gallery/" 
-            target="_blank" 
+          <a
+            href="https://mostafaalshennawy1.github.io/Seniors-2027-Gallery/"
+            target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
             style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
@@ -65,21 +58,7 @@ const Memories = () => {
           </a>
         </div>
 
-        <div className="tabs-container">
-          <div className="tabs-scroll">
-            {branches.map(branch => (
-              <button
-                key={branch}
-                className={`tab-button ${activeTab === branch ? 'active' : ''}`}
-                onClick={() => setActiveTab(branch)}
-              >
-                {branch.replace('_', ' ')}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <LightboxGallery activeTab={activeTab} />
+        <LightboxGallery />
       </div>
     </div>
   );
