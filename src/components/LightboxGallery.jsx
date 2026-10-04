@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, GraduationCap, Edit2, Trash2, Search } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, GraduationCap, Edit2, Trash2 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, where, orderBy, deleteDoc, updateDoc, doc, limit } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -12,11 +12,9 @@ const imagesImport = import.meta.glob('../assets/imgs/**/*.{png,jpg,jpeg,webp,gi
 const ACTIVE_BRANCH = 'Assiut';
 
 const LightboxGallery = () => {
-  const [allImages, setAllImages] = useState([]);
   const [displayImages, setDisplayImages] = useState([]);
   const [localImages, setLocalImages] = useState([]);
   const [firebaseImages, setFirebaseImages] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fetchLimit, setFetchLimit] = useState(20);
@@ -46,7 +44,7 @@ const LightboxGallery = () => {
     setLocalImages(loadedImages);
   }, []);
 
-  // Listen to Firebase uploads for Assiut only
+  // Listen to Firebase uploads for Assiut only in paginated groups
   useEffect(() => {
     const q = query(
       collection(db, 'uploads'),
@@ -81,7 +79,7 @@ const LightboxGallery = () => {
     return () => unsubscribe();
   }, [fetchLimit]);
 
-  // Combine Firebase + local images
+  // Combine Firebase + local images into displayed groups
   useEffect(() => {
     let combined = [...firebaseImages, ...localImages];
 
@@ -106,22 +104,8 @@ const LightboxGallery = () => {
       }
     }
 
-    setAllImages(combined);
+    setDisplayImages(combined);
   }, [localImages, firebaseImages]);
-
-  // Real-time search filter
-  useEffect(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      setDisplayImages(allImages);
-    } else {
-      setDisplayImages(
-        allImages.filter((img) =>
-          img.studentName.toLowerCase().includes(term)
-        )
-      );
-    }
-  }, [searchTerm, allImages]);
 
   const openLightbox = (index) => {
     setCurrentIndex(index);
@@ -169,6 +153,7 @@ const LightboxGallery = () => {
     }
   };
 
+  // Group loading observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -188,29 +173,6 @@ const LightboxGallery = () => {
 
   return (
     <div className="gallery-container">
-      {/* Real-time Search Bar */}
-      <div className="gallery-search-wrapper">
-        <div className="gallery-search-inner">
-          <Search size={18} className="gallery-search-icon" />
-          <input
-            type="text"
-            className="gallery-search-input"
-            placeholder="Search by student name…"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button
-              className="gallery-search-clear"
-              onClick={() => setSearchTerm('')}
-              title="Clear search"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-      </div>
-
       <div className="gallery-grid">
         {displayImages.map((img, index) => (
           <div
@@ -249,47 +211,40 @@ const LightboxGallery = () => {
             <div className="scrapbook-quote">Time flies, but memories last forever ✨</div>
           </div>
         ))}
-
-        {displayImages.length === 0 && searchTerm && (
-          <div className="gallery-no-results">
-            <Search size={48} opacity={0.3} />
-            <p>No memories found for "<strong>{searchTerm}</strong>"</p>
-          </div>
-        )}
       </div>
 
-      {hasMore && !searchTerm && (
+      {hasMore && (
         <div ref={observerTarget} style={{ height: '40px', width: '100%', margin: '2rem 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div className="loading-spinner" style={{ width: '30px', height: '30px', border: '3px solid var(--primary-container)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
           <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
-      {lightboxOpen && displayImages.length > 0 && (
+      {/* Lightbox Modal */}
+      {lightboxOpen && displayImages[currentIndex] && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>
             <X size={32} />
           </button>
-
           <button className="lightbox-nav lightbox-prev" onClick={prevImage}>
             <ChevronLeft size={48} />
           </button>
-
+          <button className="lightbox-nav lightbox-next" onClick={nextImage}>
+            <ChevronRight size={48} />
+          </button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <img
               src={displayImages[currentIndex].src}
               alt={displayImages[currentIndex].alt}
-              className="lightbox-img"
+              className="lightbox-image"
             />
-            <div className="lightbox-caption">
-              <span className="lightbox-student-name">{displayImages[currentIndex].studentName}</span>
-              <span className="lightbox-branch-name">Assiut Branch</span>
+            <div className="lightbox-caption-box">
+              <span className="lightbox-title">{displayImages[currentIndex].studentName}</span>
+              <span className="lightbox-branch label-caps text-primary">
+                {displayImages[currentIndex].branch} Branch
+              </span>
             </div>
           </div>
-
-          <button className="lightbox-nav lightbox-next" onClick={nextImage}>
-            <ChevronRight size={48} />
-          </button>
         </div>
       )}
     </div>
